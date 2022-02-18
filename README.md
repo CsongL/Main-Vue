@@ -2,4 +2,4 @@
 This repository is used to record the process of Learning the core code of Vue3
 ## First submit 
 - [x] Init project
-- [ ] Reactive Part
+- [x] Reactive Part
