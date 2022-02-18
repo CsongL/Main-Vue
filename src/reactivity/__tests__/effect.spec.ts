@@ -1,6 +1,5 @@
 import { reactive } from "../src/reactivity";
 import { effect } from "../src/effect";
-import '@types/jest'
 
 describe("effect", () => {
     it("should run the passed function once (wrapped by a effect)", () => {
