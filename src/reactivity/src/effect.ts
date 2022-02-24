@@ -7,7 +7,8 @@ const targetMap = new WeakMap(); //key是 target(目标独享), value是一个ma
 // 依赖对象类
 export class ReactiveEffect {
     deps = [];
-    constructor(public fn) {
+    // public 的作用是 实例对象可以访问到 就相当于是 this.fn = fn;
+    constructor(public fn, public schedule?) {
         console.log('创建ReactiveEffect 对象');
     }
     run() {
@@ -26,9 +27,9 @@ export class ReactiveEffect {
     }
 }
 
-export function effect(fn) {
+export function effect(fn, options: any = {}) {
     // 创建依赖实例对象
-    const _effect = new ReactiveEffect(fn);
+    const _effect = new ReactiveEffect(fn, options.schedule);
     // 执行依赖实例对象的run函数
     _effect.run();
 
@@ -56,7 +57,7 @@ export function track(target, type, key) {
 
 function trackEffect(dep) {
     // 用集合才存放对于这个对象的这个属性的所有依赖对象
-    if(!dep.has(activeEffect)) {
+    if(activeEffect && !dep.has(activeEffect)) {
         dep.add(activeEffect);
         (activeEffect as any).deps.push(dep);
     }
@@ -84,6 +85,10 @@ export function trigger(target, type, key) {
 
 function triggerEffects(dep) {
     for(let effect of dep) {
-        effect.run();
+        if(effect.schedule) {
+            effect.schedule();
+        } else {
+            effect.run();
+        }
     }
 }
