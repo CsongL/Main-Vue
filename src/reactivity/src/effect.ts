@@ -1,8 +1,10 @@
 import { createDep } from './dep'
-let activeEffect = void 0; // 表明正在收集的依赖
-const targetMap = new WeakMap();
 
 
+let activeEffect = void 0; // 全局变量 表示正在收集的依赖
+const targetMap = new WeakMap(); //key是 target(目标独享), value是一个map
+
+// 依赖对象类
 export class ReactiveEffect {
     deps = [];
     constructor(public fn) {
@@ -12,6 +14,8 @@ export class ReactiveEffect {
         // 在这个函数里面执行fn, 从而实现 依赖收集
         activeEffect = this as any;
 
+        if(!activeEffect) return
+        
         let result = activeEffect.fn(); // 在执行这个函数的过程中，从而触发track()收集依赖
 
         activeEffect = undefined;
