@@ -74,7 +74,6 @@ describe("effect", () => {
       obj.foo = 3;
       expect(dummy).toBe(2);
       runner();
-      obj.foo = 3;
       expect(dummy).toBe(3);
     })
 

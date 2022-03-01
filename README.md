@@ -15,6 +15,6 @@ This repository is used to record the process of Learning the core code of Vue3
 ## Fourth submit
 - [X] readonly getter
 - [X] isReactive and isReadonly
-- [ ] optimize Stop function
+- [X] optimize Stop function
 
 

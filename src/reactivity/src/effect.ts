@@ -2,6 +2,7 @@ import { createDep } from './dep'
 import { extend } from '../../shared/index'
 
 let activeEffect = void 0; // 全局变量 表示正在收集的依赖
+let shouldTrack = false; // 用来判断是否应该收集这个依赖，在代码作用机制上与activeEffect类似
 const targetMap = new WeakMap(); //key是 target(目标独享), value是一个map
 
 // 依赖对象类
@@ -18,13 +19,22 @@ export class ReactiveEffect {
     run() {
         console.log('ReactiveEffect run function')
         // 在这个函数里面执行fn, 从而实现 依赖收集
+
+        // 如果这个effect实例对象已经调用过stop()函数,那么就不应该在出发依赖收集,而只是单纯的执行函数
+        // 如果调用过stop()函数，那么会到只this.active标签的值变为false，
+        if(!this.active) {
+            this.fn();
+        }
+
         activeEffect = this as any;
+        shouldTrack = true;
 
         if(!activeEffect) return
         
         let result = activeEffect.fn(); // 在执行这个函数的过程中，从而触发track()收集依赖
 
         activeEffect = undefined;
+        shouldTrack = false;
 
         return result;
     }
@@ -64,7 +74,15 @@ export function effect(fn, options: any = {}) {
     return runner;
 }
 
+function isTrack() {
+    return shouldTrack && activeEffect !== undefined;
+}
+
 export function track(target, type, key) {
+    // 在开始收集依赖之前，判断是shouldTrack 是否为true 以及 activeEffect是否有对应的值
+    if(!isTrack()) {
+        return;
+    }
     let depMap = targetMap.get(target);
     if(!depMap) {
         depMap = new Map();
