@@ -1,12 +1,16 @@
 import { createDep } from './dep'
-
+import { extend } from '../../shared/index'
 
 let activeEffect = void 0; // 全局变量 表示正在收集的依赖
 const targetMap = new WeakMap(); //key是 target(目标独享), value是一个map
 
 // 依赖对象类
 export class ReactiveEffect {
+    // 用来标明这个effect对象是否还起作用，也就是这个effect对象是否还会被调用
+    // 另一方面也是用来优化, 避免多次调用active函数
+    active = true;
     deps = [];
+    public onStop?: () => void;
     // public 的作用是 实例对象可以访问到 就相当于是 this.fn = fn;
     constructor(public fn, public schedule?) {
         console.log('创建ReactiveEffect 对象');
@@ -22,14 +26,35 @@ export class ReactiveEffect {
 
         activeEffect = undefined;
 
-
         return result;
     }
+    stop() {
+        if(this.active){
+            cleanupEffect(this);
+            if(this.onStop) {
+                this.onStop();
+            }
+            this.active = false;
+        }
+    }
+}
+
+export function stop(runner) {
+    runner.effect.stop();
+}
+
+function cleanupEffect(effect) {
+    effect.deps.forEach((dep) => {
+        dep.delete(effect);
+    })
+    effect.deps.length = 0;
 }
 
 export function effect(fn, options: any = {}) {
     // 创建依赖实例对象
     const _effect = new ReactiveEffect(fn, options.schedule);
+    // 通过object方法将options上的属性都赋值给依赖实例对象
+    extend(_effect, options);
     // 执行依赖实例对象的run函数
     _effect.run();
 
