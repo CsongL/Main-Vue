@@ -13,4 +13,18 @@ describe('reactive', () => {
         expect(isReactive(reactiveObj)).toBe(true);
         expect(isReactive(original)).toBe(false);
     })
+
+    it('nest Object', () => {
+        let original = {
+            foo: 1,
+            bar: {
+                name: 2
+            },
+            arr: [1,2,3]
+        }
+        let reactiveObj = reactive(original);
+        expect(isReactive(reactiveObj)).toBe(true);
+        expect(isReactive(reactiveObj.bar)).toBe(true);
+        expect(isReactive(reactiveObj.arr)).toBe(true);
+    })
 })

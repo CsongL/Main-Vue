@@ -22,4 +22,18 @@ describe('readonly', () => {
         expect(original).not.toBe(readonlyObj);
         expect(isReadonly(readonlyObj)).toBe(true);
     })
+
+    it('nest readonly', () => {
+        let original = {
+            foo: 1,
+            bar: {
+                name: 2
+            },
+            arr: [1,2,3]
+        }
+        let readonlyObj = readonly(original);
+        expect(isReadonly(readonlyObj)).toBe(true);
+        expect(isReadonly(readonlyObj.bar)).toBe(true);
+        expect(isReadonly(readonlyObj.arr)).toBe(true);
+    })
 })
