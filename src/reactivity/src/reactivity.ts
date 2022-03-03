@@ -1,7 +1,8 @@
 
 import { 
     mutableHandler,
-    readonlyHandler
+    readonlyHandler,
+    shallowReadonlyHandler
 } from './baseHandler'
 
 // reactiveMap  用来  存储target的代理对象
@@ -19,6 +20,10 @@ export function reactive(target) {
 
 export function readonly(target) {
     return createReactiveObj(target, readonlyHandler);
+}
+
+export function shallowReadonly(target) {
+    return createReactiveObj(target, shallowReadonlyHandler);
 }
 
 function createReactiveObj(target, baseHandler) {

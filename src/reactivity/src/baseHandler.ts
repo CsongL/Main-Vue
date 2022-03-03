@@ -1,13 +1,14 @@
 import { track, trigger} from './effect'
 import { ReactiveFlags, readonly, reactive } from './reactivity'
-import { isObject }  from '../../shared/index'
+import { isObject, extend }  from '../../shared/index'
 
 
 const get = createGet();
 const set = createSet();
 const readonlyGet = createGet(true)
+const shallowReadonlyGet = createGet(true, true);
 
-function createGet(isReadonly = false) {
+function createGet(isReadonly = false, isShallow = false) {
     return function get(target, key, receiver) {
         
         if(key === ReactiveFlags.IS_REACTIVE) {
@@ -17,6 +18,11 @@ function createGet(isReadonly = false) {
         }
 
         let result = Reflect.get(target, key, receiver);
+
+        // 只有最外层对象是一个响应式对象，对象内部属性所对应的对象不再将其变为一个内部对象
+        if(isShallow) {
+            return result;
+        }
 
         if(isObject(result)) {
             return isReadonly ? readonly(result) : reactive(result);
@@ -57,3 +63,7 @@ export const readonlyHandler = {
         return true;
     }
 }
+
+export const shallowReadonlyHandler = extend({}, readonlyHandler, {
+    get: shallowReadonlyGet
+})
