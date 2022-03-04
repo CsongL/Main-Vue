@@ -74,7 +74,7 @@ export function effect(fn, options: any = {}) {
     return runner;
 }
 
-function isTrack() {
+export function isTrack() {
     return shouldTrack && activeEffect !== undefined;
 }
 
@@ -98,7 +98,7 @@ export function track(target, type, key) {
     trackEffect(dep);
 }
 
-function trackEffect(dep) {
+export function trackEffect(dep) {
     // 用集合才存放对于这个对象的这个属性的所有依赖对象
     if(activeEffect && !dep.has(activeEffect)) {
         dep.add(activeEffect);
@@ -126,7 +126,7 @@ export function trigger(target, type, key) {
     triggerEffects(createDep(effects));
 }
 
-function triggerEffects(dep) {
+export function triggerEffects(dep) {
     for(let effect of dep) {
         if(effect.schedule) {
             effect.schedule();

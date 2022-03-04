@@ -17,4 +17,6 @@ This repository is used to record the process of Learning the core code of Vue3
 - [X] isReactive and isReadonly
 - [X] optimize Stop function
 
+## Firth submit
+- [X] ref function 
 
