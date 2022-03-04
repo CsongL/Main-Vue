@@ -1,4 +1,4 @@
-import { readonly, isReadonly } from '../src/reactivity'
+import { readonly, isReadonly, isProxy} from '../src/reactivity'
 
 describe('readonly', () => {
     it('readonly function', () => {
@@ -21,6 +21,8 @@ describe('readonly', () => {
         expect(isReadonly(original)).toBe(false);
         expect(original).not.toBe(readonlyObj);
         expect(isReadonly(readonlyObj)).toBe(true);
+        expect(isProxy(original)).toBe(false);
+        expect(isProxy(readonlyObj)).toBe(true);
     })
 
     it('nest readonly', () => {

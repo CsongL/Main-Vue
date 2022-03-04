@@ -1,4 +1,4 @@
-import { reactive, isReactive } from '../src/reactivity'
+import { reactive, isReactive, isProxy } from '../src/reactivity'
 
 
 describe('reactive', () => {
@@ -12,6 +12,8 @@ describe('reactive', () => {
         let reactiveObj = reactive(original);
         expect(isReactive(reactiveObj)).toBe(true);
         expect(isReactive(original)).toBe(false);
+        expect(isProxy(reactiveObj)).toBe(true);
+        expect(isProxy(original)).toBe(false);
     })
 
     it('nest Object', () => {
@@ -27,4 +29,5 @@ describe('reactive', () => {
         expect(isReactive(reactiveObj.bar)).toBe(true);
         expect(isReactive(reactiveObj.arr)).toBe(true);
     })
+
 })
