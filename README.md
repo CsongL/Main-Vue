@@ -19,4 +19,5 @@ This repository is used to record the process of Learning the core code of Vue3
 
 ## Firth submit
 - [X] ref function 
-
+## Sixth submit
+- [X] basic computed property
