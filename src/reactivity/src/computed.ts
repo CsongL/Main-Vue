@@ -16,6 +16,8 @@ class ComputedRefImpl {
         })
     }
     get value() { 
+        // 上锁，如果被依赖的数据没有改变，那么就不需要运行effect.run函数
+        // 解锁是在声明effect对象的schedule属性中完成的
         if(this._dirty) {
             this._dirty = false;
             this._value = this._effect.run();
