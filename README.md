@@ -21,3 +21,6 @@ This repository is used to record the process of Learning the core code of Vue3
 - [X] ref function 
 ## Sixth submit
 - [X] basic computed property
+
+## Seventh submit
+- [X] basic render component process
