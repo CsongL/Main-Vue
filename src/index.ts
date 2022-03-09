@@ -1,3 +1,2 @@
-export function add(a, b) {
-    return a + b;
-}
+export { createApp } from './runtime-core/createApp'
+export { h } from './runtime-core/h'

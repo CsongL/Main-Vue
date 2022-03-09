@@ -3,6 +3,7 @@ export function createComponentInstance(vNode) {
         vNode,
         type: vNode.type // vNode.type 对应的才是真正的组件
     }
+    return instance
 }
 
 export function setupComponent(instance) {
