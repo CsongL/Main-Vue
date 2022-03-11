@@ -27,7 +27,7 @@ function processElement(vNode, container) {
 
 function mountElement(vNode, container) {
     // 走到这里说明vNode表示的是一个元素，因此vNode.type表述的就是该元素的类型
-    let el = document.createElement(vNode.type);
+    let el = (vNode.el = document.createElement(vNode.type));
 
     let { children } = vNode;
 
@@ -64,13 +64,15 @@ function mountComponent(vNode, container) {
 
     // 第二部设置组件实例对象的属性
     setupComponent(instance);
-    setupRenderEffect(instance, container);
+    setupRenderEffect(instance, vNode, container);
 }
 
-function setupRenderEffect(instance, container) {
-    const subTree = instance.render();
+function setupRenderEffect(instance, vNode, container) {
+    let { proxy } = instance;
+    const subTree = instance.render.call(proxy);
 
     if(subTree) {
         patch(subTree, container);
     }
+    vNode.el = subTree.el;
 }

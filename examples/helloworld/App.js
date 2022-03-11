@@ -1,26 +1,14 @@
 import { h } from '../../lib/guide-mini-vue.esm.js';
 
+window.self = null;
 export const App = {
     render() {
+        window.self = this;
         return h('div', 
             {
                 id: 'root',
                 class: 'red blue' 
-            },[
-                h(
-                    'p',
-                    {
-                        class: 'red'
-                    }, 'hi'
-                ),
-                h(
-                    'p',
-                    {
-                        class: 'blue'
-                    }, 
-                    'world'
-                )
-            ]);
+            }, 'hi ' + this.msg);
     },
     setup() {
         return {
