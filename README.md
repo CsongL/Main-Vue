@@ -25,3 +25,6 @@ This repository is used to record the process of Learning the core code of Vue3
 
 ## Seventh submit
 - [X] basic render component process
+
+- [X] mount Element
+- [ ] Component Proxy Object
