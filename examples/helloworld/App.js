@@ -1,4 +1,5 @@
 import { h } from '../../lib/guide-mini-vue.esm.js';
+import { Foo } from './Foo.js';
 
 window.self = null;
 export const App = {
@@ -11,7 +12,11 @@ export const App = {
                 onClick: () => {
                     console.log('click');
                 }
-            }, 'hi ' + this.msg);
+            }, [
+                h('div', {class: 'blue'}, 'Foo component'),
+                h(Foo, {count: 1})
+            ]);
+            // }, 'hi ' + this.msg);
     },
     setup() {
         return {

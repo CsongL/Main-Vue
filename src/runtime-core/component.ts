@@ -1,16 +1,20 @@
 import { componentPublicInstance } from "./componentpublicInstance";
+import { initProps } from "./ComponentProps";
+import { shallowReadonly } from "../reactivity/src/reactivity"
 
 export function createComponentInstance(vNode) {
     const instance = {
         vNode,
         type: vNode.type, // vNode.type 对应的才是真正的组件
-        setupState: {}
+        setupState: {},
+        props: {} // 组件上的属性，父组件给子组件传值
     }
     return instance
 }
 
 export function setupComponent(instance) {
-    // initProps
+    let { props } = instance.vNode;
+    initProps(instance, props);
     // initSlots
     setupStatefulComponent(instance);
 }
@@ -24,7 +28,7 @@ function setupStatefulComponent(instance) {
     let { setup } = component;
     
     if(setup) {
-        const setupResult = setup();
+        const setupResult = setup(shallowReadonly(instance.props));
 
         handleSetupResult(instance, setupResult);
     }
