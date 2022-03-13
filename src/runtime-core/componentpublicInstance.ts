@@ -13,5 +13,4 @@ export const componentPublicInstance = {
             return publicGetter(instance);
         }
     }
-
 }

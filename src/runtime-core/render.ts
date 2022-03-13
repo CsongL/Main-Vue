@@ -1,5 +1,6 @@
 import { createComponentInstance, setupComponent } from './component'
 import { isObject } from '../shared/index'
+import { ShapeFlags } from '../shared/shapeFlags'
 
 export function render(vNode, container) {
     // 调用patch进行vNode的拆箱操作，也就是看虚拟节点后是否还有其他节点
@@ -29,18 +30,26 @@ function mountElement(vNode, container) {
     // 走到这里说明vNode表示的是一个元素，因此vNode.type表述的就是该元素的类型
     let el = (vNode.el = document.createElement(vNode.type));
 
-    let { children } = vNode;
+    let { children, shapeFlags } = vNode;
 
-    if(typeof children === "string") {
+    if(shapeFlags & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = children;
-    } else if(Array.isArray(children)) {
+    } else if(shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
         // 因为是挂载该元素的子元素，因此该元素就应该是这些子元素的容器
         mountChildren(children, el);
     }
 
     let { props } = vNode;
     for(const key in props) {
-        el.setAttribute(key, props[key]);
+        const val = props[key];
+        // 判断属性是一个要添加在元素上的事件还是只是单纯的元素属性
+        let isOnEvent = /^on[A-Z]/.test(key);
+        if(isOnEvent) {
+            let eventName = key.slice(2).toLowerCase();
+            el.addEventListener(eventName, val);
+        } else {
+            el.setAttribute(key, props[key]);
+        }
     }
 
     container.appendChild(el);

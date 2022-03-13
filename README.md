@@ -27,4 +27,6 @@ This repository is used to record the process of Learning the core code of Vue3
 - [X] basic render component process
 
 - [X] mount Element
-- [ ] Component Proxy Object
+- [X] Component Proxy Object
+- [X] ShapeFlags used to judge the vNode type
+- [X] Add Element Event
