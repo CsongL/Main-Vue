@@ -2,6 +2,7 @@ import { componentPublicInstance } from "./componentpublicInstance";
 import { initProps } from "./ComponentProps";
 import { shallowReadonly } from "../reactivity/src/reactivity"
 import { emit } from './componentemit'
+import { initSlots } from './componentSlot'
 
 export function createComponentInstance(vNode) {
     const instance = {
@@ -9,16 +10,19 @@ export function createComponentInstance(vNode) {
         type: vNode.type, // vNode.type 对应的才是真正的组件
         setupState: {},
         props: {}, // 组件上的属性，父组件给子组件传值
-        emit: () => {} // 声明组件实例对象的emit属性
+        slots: {}, // 存放插槽
+        emit: () => {}, // 声明组件实例对象的emit属性
     }
     instance.emit = emit.bind(null, instance) as any;
     return instance
 }
 
 export function setupComponent(instance) {
-    let { props } = instance.vNode;
+    let { props, children } = instance.vNode;
+    // initProps
     initProps(instance, props);
     // initSlots
+    initSlots(instance, children);
     setupStatefulComponent(instance);
 }
 

@@ -10,14 +10,23 @@ export function createVNode(type, props?, children?) {
         shapeFlags: getShapeFlag(type), // 该虚拟节点的类型是什么类型，组件或元素以及children的类型
         el: null // 获取该虚拟节点的根元素
     }
-    
+
     if(vNode.shapeFlags && typeof vNode.children === 'string') {
         vNode.shapeFlags = vNode.shapeFlags | ShapeFlags.TEXT_CHILDREN;
     } else if(vNode.shapeFlags && Array.isArray(vNode.children)) {
         vNode.shapeFlags = vNode.shapeFlags | ShapeFlags.ARRAY_CHILDREN;
     }
 
+    nomalizeSlots(vNode, vNode.children)
     return vNode;
+}
+
+function nomalizeSlots(vNode, children) {
+    if(vNode.shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+        if(typeof children === 'object') {
+            vNode.shapeFlags |= ShapeFlags.SLOTS_CHILDREN;
+        }
+    }
 }
 
 function getShapeFlag(type) {

@@ -2,5 +2,7 @@ export const enum ShapeFlags {
     ELEMENT= 1, // 0001
     STATEFUL_COMPONENT = 1 << 1, // 0010
     TEXT_CHILDREN = 1 << 2, // 0100
-    ARRAY_CHILDREN = 1 << 3 // 1000
+    ARRAY_CHILDREN = 1 << 3, // 1000
+    // vNode的children是一个slot(插槽)
+    SLOTS_CHILDREN = 1 << 4
 }

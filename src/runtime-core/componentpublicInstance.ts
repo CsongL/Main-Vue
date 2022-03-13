@@ -2,7 +2,8 @@ import { hasOwn } from "../shared/index";
 
 
 const publicPropertiesMap = {
-    $el: (i) => i.vNode.el
+    $el: (i) => i.vNode.el,
+    $slot: (i) => i.slots
 };
 
 export const componentPublicInstance = {
