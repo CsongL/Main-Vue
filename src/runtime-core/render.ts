@@ -24,9 +24,9 @@ function patch(vNode, container) {
             processText(vNode, container);
             break;
         default:
-            if(typeof type === 'string') {
+            if(shapeFlags & ShapeFlags.ELEMENT) {
                 processElement(vNode, container);
-            } else if(isObject(type)) {
+            } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
                 processComponent(vNode, container);
             }
     }

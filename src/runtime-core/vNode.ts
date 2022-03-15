@@ -39,3 +39,7 @@ function getShapeFlag(type) {
         return ShapeFlags.STATEFUL_COMPONENT;
     }
 }
+
+export function createTextVNode(text: string) {
+    createVNode(Text, {}, text);
+}
