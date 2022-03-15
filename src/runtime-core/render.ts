@@ -1,6 +1,8 @@
 import { createComponentInstance, setupComponent } from './component'
 import { isObject } from '../shared/index'
 import { ShapeFlags } from '../shared/shapeFlags'
+import { Fragment, Text } from './vNode'
+
 
 export function render(vNode, container) {
     // 调用patch进行vNode的拆箱操作，也就是看虚拟节点后是否还有其他节点
@@ -13,12 +15,30 @@ function patch(vNode, container) {
     // 如果vNode.type 类型是一个Object，那么这个虚拟节点就是一个组件
     // 如果是元素 则调用 processElement();
     // 如果是组件 则调用 processComponent();
-    let { type } = vNode;
-    if(typeof type === 'string') {
-        processElement(vNode, container);
-    } else if(isObject(type)) {
-        processComponent(vNode, container);
+    let { type, shapeFlags} = vNode;
+    switch(type) {
+        case Fragment:
+            processFragment(vNode, container);
+            break;
+        case Text:
+            processText(vNode, container);
+            break;
+        default:
+            if(typeof type === 'string') {
+                processElement(vNode, container);
+            } else if(isObject(type)) {
+                processComponent(vNode, container);
+            }
     }
+}
+function processFragment(vNode, container) {
+    mountChildren(vNode, container);
+}
+
+function processText(vNode, container) {
+    let { children } = vNode;
+    let textNode = document.createTextNode(children.text);
+    container.appendChild(textNode);
 }
 
 function processElement(vNode, container) {
