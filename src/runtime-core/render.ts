@@ -98,6 +98,7 @@ function mountComponent(vNode, container) {
 
 function setupRenderEffect(instance, vNode, container) {
     let { proxy } = instance;
+    if(!instance.render) return;
     const subTree = instance.render.call(proxy);
 
     if(subTree) {
