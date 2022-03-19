@@ -4,13 +4,15 @@ import { shallowReadonly } from "../reactivity/src/reactivity"
 import { emit } from './componentemit'
 import { initSlots } from './componentSlot'
 
-export function createComponentInstance(vNode) {
+export function createComponentInstance(vNode, parent) {
     const instance = {
         vNode,
         type: vNode.type, // vNode.type 对应的才是真正的组件
         setupState: {},
         props: {}, // 组件上的属性，父组件给子组件传值
         slots: {}, // 存放插槽
+        provides: parent ? parent.provides : {},
+        parent,
         emit: () => {}, // 声明组件实例对象的emit属性
     }
     instance.emit = emit.bind(null, instance) as any;
