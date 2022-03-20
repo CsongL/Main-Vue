@@ -1,0 +1,6 @@
+export { h } from './h'
+export { createRender } from './render'
+export { renderSlots } from './helper/renderSlots'
+export { createTextVNode } from './vNode'
+export { getCurrentInstance } from './component'
+export { provide, inject} from './apiInject'
