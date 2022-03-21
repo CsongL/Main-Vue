@@ -3,6 +3,7 @@ import { initProps } from "./ComponentProps";
 import { shallowReadonly } from "../reactivity/src/reactivity"
 import { emit } from './componentemit'
 import { initSlots } from './componentSlot'
+import { proxyRef } from "../reactivity";
 
 export function createComponentInstance(vNode, parent) {
     const instance = {
@@ -50,7 +51,7 @@ function setupStatefulComponent(instance) {
 function handleSetupResult(instance, setupResult) {
     // 如果setupResult是一个对象
     if(typeof setupResult === 'object') {
-        instance.setupState = setupResult;
+        instance.setupState = proxyRef(setupResult);
     }
 
     finishComponent(instance);

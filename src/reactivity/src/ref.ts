@@ -22,7 +22,7 @@ class RefImpl {
             this._rawValue = newValue;
             this._value = convert(newValue);
             triggerRefValue(this);
-        } 
+        }
     }
 }
 

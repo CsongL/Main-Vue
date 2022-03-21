@@ -3,6 +3,7 @@ import { isObject } from '../shared/index'
 import { ShapeFlags } from '../shared/shapeFlags'
 import { Fragment, Text } from './vNode'
 import { createAppApi } from './createApp'
+import { effect } from '../reactivity/src/effect'
 
 export function createRender(options) {
     const { 
@@ -13,28 +14,29 @@ export function createRender(options) {
 
     function render(vNode, container) {
         // 调用patch进行vNode的拆箱操作，也就是看虚拟节点后是否还有其他节点
-        patch(vNode, container, null);
+        patch(null, vNode, container, null);
     }
     
-    function patch(vNode, container, parentComponent) {
+    // n1表示之前旧的虚拟节点， n2表示现在新的虚拟节点
+    function patch(n1 ,n2, container, parentComponent) {
         // 先判虚拟节点的类型 是元素还是 组件
         // 如果虚拟节点的type是一个string类型， 那么该虚拟节点就是一个元素，
         // 如果vNode.type 类型是一个Object，那么这个虚拟节点就是一个组件
         // 如果是元素 则调用 processElement();
         // 如果是组件 则调用 processComponent();
-        let { type, shapeFlags} = vNode;
+        let { type, shapeFlags} = n2;
         switch(type) {
             case Fragment:
-                processFragment(vNode, container, parentComponent);
+                processFragment(n2, container, parentComponent);
                 break;
             case Text:
-                processText(vNode, container);
+                processText(n2, container);
                 break;
             default:
                 if(shapeFlags & ShapeFlags.ELEMENT) {
-                    processElement(vNode, container, parentComponent);
+                    processElement(n1, n2, container, parentComponent);
                 } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-                    processComponent(vNode, container, parentComponent);
+                    processComponent(n1, n2, container, parentComponent);
                 }
         }
     }
@@ -48,9 +50,16 @@ export function createRender(options) {
         container.appendChild(textNode);
     }
     
-    function processElement(vNode, container, parentComponent) {
+    function processElement(n1, n2, container, parentComponent) {
         // 在这里要去判断是新建一个元素还是更新一个元素
-        mountElement(vNode, container, parentComponent);
+        if(!n1) {
+            console.log('mount');
+            mountElement(n2, container, parentComponent);
+        }else {
+            console.log('update');
+            updateElement(n1, n2, container, parentComponent);
+        }
+
     }
     
     function mountElement(vNode, container, parentComponent) {
@@ -74,17 +83,25 @@ export function createRender(options) {
     
         hostInsert(el, container);
     }
+
+    function updateElement(n1, n2, contaienr, parentComponent) {
+        // 更新元素
+    }
     
     function mountChildren(children, container, parentComponent) {
         children.forEach((v) => {
-            patch(v, container, parentComponent);
+            patch(null, v, container, parentComponent);
         })
     }
     
-    function processComponent(vNode, container, parentComponent) {
+    function processComponent(n1, n2, container, parentComponent) {
         // 判断是要重新创建一个组件，还是更新一个组件
         // 创建一个新的组件
-        mountComponent(vNode, container, parentComponent);
+        if(!n1) {
+            mountComponent(n2, container, parentComponent);
+        } else {
+            updateComponent(n1, n2, container, parentComponent);
+        }
     }
     
     function mountComponent(vNode, container, parentComponent) {
@@ -97,14 +114,42 @@ export function createRender(options) {
     }
     
     function setupRenderEffect(instance, vNode, container) {
-        let { proxy } = instance;
-        if(!instance.render) return;
-        const subTree = instance.render.call(proxy);
-    
-        if(subTree) {
-            patch(subTree, container, instance);
-        }
-        vNode.el = subTree.el;
+        effect(() => {
+            if(!instance.isMounted) {
+                let { proxy } = instance;
+                if(!instance.render) return;
+
+                const subTree = instance.render.call(proxy);
+                instance.subTree = subTree;
+
+                if(subTree) {
+                    patch(null, subTree, container, instance);
+                }
+                vNode.el = subTree.el;
+                instance.isMounted = true;
+            } else {
+                let { proxy } = instance;
+                if(!instance.render) return;
+
+                const subTree = instance.render.call(proxy);
+                const previewTree = instance.subTree;
+                console.log('update instance');
+                console.log('previewTree', previewTree);
+                console.log('currentTree', subTree);
+
+                instance.subTree = subTree;
+                
+                if(subTree) {
+                    patch(previewTree, subTree, container, instance);
+                }
+                vNode.el = subTree.el;
+            }
+        })
+        
+    }
+    // 更新组件
+    function updateComponent(n1, n2, container, parentComponent) {
+
     }
 
     // 最终返回的是一个对象，这个对象里面有一个createApp属性
