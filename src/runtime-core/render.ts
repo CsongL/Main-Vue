@@ -1,5 +1,5 @@
 import { createComponentInstance, setupComponent } from './component'
-import { isObject } from '../shared/index'
+import { isObject, EMPTY_OBJECT } from '../shared/index'
 import { ShapeFlags } from '../shared/shapeFlags'
 import { Fragment, Text } from './vNode'
 import { createAppApi } from './createApp'
@@ -56,7 +56,7 @@ export function createRender(options) {
             console.log('mount');
             mountElement(n2, container, parentComponent);
         }else {
-            console.log('update');
+            console.log('update' );
             updateElement(n1, n2, container, parentComponent);
         }
 
@@ -78,14 +78,37 @@ export function createRender(options) {
         let { props } = vNode;
         for(const key in props) {
             const val = props[key];
-            hostPatchProps(el, key, val);
+            hostPatchProps(el, key, null, val);
         }
     
         hostInsert(el, container);
     }
 
-    function updateElement(n1, n2, contaienr, parentComponent) {
+    function updateElement(n1, n2, container, parentComponent) {
         // 更新元素
+        const oldProps = n1.props || EMPTY_OBJECT;
+        const newProps = n2.props || EMPTY_OBJECT;
+
+        // el说我们根据vNode的type创建出来的元素
+        const el = (n2.el = n1.el);
+
+        updateProps(el, oldProps, newProps);
+    }
+
+    function updateProps(el, oldProps, newProps) {
+        for(const key in newProps) {
+            const prevProp = oldProps[key];
+            const nextProp = newProps[key];
+            if(prevProp !== nextProp) {
+                hostPatchProps(el, key, prevProp, nextProp);
+            }
+        }
+        // 若是在newProps没有这个属性，则需要将这个属性删除
+        for(const key in oldProps) {
+            if(!(key in newProps)) {
+                hostPatchProps(el, key, oldProps[key], null);
+            }
+        }
     }
     
     function mountChildren(children, container, parentComponent) {
@@ -133,7 +156,6 @@ export function createRender(options) {
 
                 const subTree = instance.render.call(proxy);
                 const previewTree = instance.subTree;
-                console.log('update instance');
                 console.log('previewTree', previewTree);
                 console.log('currentTree', subTree);
 

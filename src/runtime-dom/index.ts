@@ -4,14 +4,18 @@ export function createElement(type) {
     return document.createElement(type);
 }
 
-export function patchProps(el, key, val) {
+export function patchProps(el, key, prevVal, nextVal) {
     // 判断属性是一个要添加在元素上的事件还是只是单纯的元素属性
     let isOnEvent = /^on[A-Z]/.test(key);
     if(isOnEvent) {
         let eventName = key.slice(2).toLowerCase();
-        el.addEventListener(eventName, val);
+        el.addEventListener(eventName, nextVal);
     } else {
-        el.setAttribute(key, val);
+        if(nextVal === undefined || nextVal === null) {
+            el.removeAttribute(key);
+        } else {
+            el.setAttribute(key, nextVal);
+        }
     }
 }
 
