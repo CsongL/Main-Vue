@@ -4,12 +4,15 @@ import { ShapeFlags } from '../shared/shapeFlags'
 import { Fragment, Text } from './vNode'
 import { createAppApi } from './createApp'
 import { effect } from '../reactivity/src/effect'
+import { remove } from '../runtime-dom'
 
 export function createRender(options) {
     const { 
         createElement: hostCreateElement, 
         patchProps: hostPatchProps, 
-        insert: hostInsert, 
+        insert: hostInsert,
+        remove: hostRemove,
+        setElementText: hostSetElementText 
     } = options
 
     function render(vNode, container) {
@@ -41,7 +44,7 @@ export function createRender(options) {
         }
     }
     function processFragment(vNode, container, parentComponent) {
-        mountChildren(vNode, container, parentComponent);
+        mountChildren(vNode.children, container, parentComponent);
     }
     
     function processText(vNode, container) {
@@ -91,8 +94,40 @@ export function createRender(options) {
 
         // el说我们根据vNode的type创建出来的元素
         const el = (n2.el = n1.el);
-
+        updateChildren(n1, n2, el, parentComponent);
         updateProps(el, oldProps, newProps);
+    }
+
+
+    function updateChildren(n1, n2, container, parentComponent) {
+        
+        console.log('updateChildren');
+        const prevShapeFlag = n1.shapeFlags;
+        const currShapeFlag = n2.shapeFlags;
+
+        const c1 = n1.children;
+        const c2 = n2.children;
+
+        if(currShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+            if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+               unMountChild(c1);
+            }
+            if(c1 !== c2) {
+                hostSetElementText(container, c2)
+            }
+        } else {
+            if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+                hostSetElementText(container, '');
+                mountChildren(c2, container, parentComponent);
+            }
+        }
+
+    }
+
+    function unMountChild(children) {
+        children.forEach((child) => {
+            hostRemove(child.el)
+        })
     }
 
     function updateProps(el, oldProps, newProps) {

@@ -19,6 +19,18 @@ export function patchProps(el, key, prevVal, nextVal) {
     }
 }
 
+export function remove(el) {
+    const parent = el.parentNode;
+    console.log('remove', el, parent);
+    if(parent) {
+        parent.removeChild(el);
+    }
+}
+
+export function setElementText(el, text) {
+    el.textContent = text;
+}
+
 export function insert(el, container) {
     container.appendChild(el);
 }
@@ -26,7 +38,9 @@ export function insert(el, container) {
 let renderer: any = createRender({
     createElement,
     patchProps,
-    insert
+    insert,
+    remove,
+    setElementText
 })
 
 export const createApp = (...args) => {
