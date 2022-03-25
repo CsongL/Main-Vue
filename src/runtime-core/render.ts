@@ -17,11 +17,16 @@ export function createRender(options) {
 
     function render(vNode, container) {
         // 调用patch进行vNode的拆箱操作，也就是看虚拟节点后是否还有其他节点
-        patch(null, vNode, container, null);
+        patch(null, vNode, container, null, null);
     }
     
     // n1表示之前旧的虚拟节点， n2表示现在新的虚拟节点
-    function patch(n1 ,n2, container, parentComponent) {
+    function patch(
+        n1,
+        n2, 
+        container, 
+        anchor, 
+        parentComponent) {
         // 先判虚拟节点的类型 是元素还是 组件
         // 如果虚拟节点的type是一个string类型， 那么该虚拟节点就是一个元素，
         // 如果vNode.type 类型是一个Object，那么这个虚拟节点就是一个组件
@@ -37,7 +42,7 @@ export function createRender(options) {
                 break;
             default:
                 if(shapeFlags & ShapeFlags.ELEMENT) {
-                    processElement(n1, n2, container, parentComponent);
+                    processElement(n1, n2, container, anchor, parentComponent);
                 } else if(shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
                     processComponent(n1, n2, container, parentComponent);
                 }
@@ -53,11 +58,11 @@ export function createRender(options) {
         container.appendChild(textNode);
     }
     
-    function processElement(n1, n2, container, parentComponent) {
+    function processElement(n1, n2, container, anchor, parentComponent) {
         // 在这里要去判断是新建一个元素还是更新一个元素
         if(!n1) {
             console.log('mount');
-            mountElement(n2, container, parentComponent);
+            mountElement(n2, container, anchor, parentComponent);
         }else {
             console.log('update' );
             updateElement(n1, n2, container, parentComponent);
@@ -65,7 +70,7 @@ export function createRender(options) {
 
     }
     
-    function mountElement(vNode, container, parentComponent) {
+    function mountElement(vNode, container, anchor, parentComponent) {
         // 走到这里说明vNode表示的是一个元素，因此vNode.type表述的就是该元素的类型
         let el = (vNode.el = hostCreateElement(vNode.type));
     
@@ -84,7 +89,7 @@ export function createRender(options) {
             hostPatchProps(el, key, null, val);
         }
     
-        hostInsert(el, container);
+        hostInsert(el, container, anchor);
     }
 
     function updateElement(n1, n2, container, parentComponent) {
@@ -120,10 +125,65 @@ export function createRender(options) {
                 hostSetElementText(container, '');
                 mountChildren(c2, container, parentComponent);
             }
+            if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+                patchKeyedChildren(c1, c2, container, parentComponent);
+            }
         }
 
     }
 
+    function patchKeyedChildren(c1, c2, container, parentComponent) {
+        const l2 = c2.length;
+        let i = 0;
+        let e1 = c1.length - 1;
+        let e2 = l2 - 1;
+
+        const isSameVNode = (node1, node2) => {
+            return node1.type === node2.type && node1.key === node2.key;
+        }
+        // 比较左侧相同点, 直到不同点
+        while(i <= e1 && i <= e2) {
+            const oldNode = c1[i];
+            const newNode = c2[i];
+
+            if(isSameVNode(oldNode, newNode)) {
+                patch(oldNode, newNode, container, null, parentComponent);
+                i++;
+            } else {
+                break;
+            }
+        }
+
+        // 比较右侧相同点 直到不同的地方
+        while(i <= e1 && i <= e2) {
+            const oldNode = c1[e1];
+            const newNode = c2[e2];
+
+            if(isSameVNode(oldNode, newNode)) {
+                patch(oldNode, newNode, container, null, parentComponent);
+                e1--;
+                e2--;
+            } else {
+                break;
+            }
+        }
+
+        //新的比老的多
+        if(i > e1 && i <= e2) {
+            let nextPos = e2+1;
+            let anchor = nextPos < l2 ? c2[nextPos].el : null;
+            while( i <= e2) {
+                patch(null, c2[i], container, anchor, parentComponent);
+                i++;
+            }
+        } else if(i > e2 && i <= e1 ) {
+            while(i <= e1) {
+                hostRemove(c1[i].el);
+                i++;
+            }
+        }
+
+    }
     function unMountChild(children) {
         children.forEach((child) => {
             hostRemove(child.el)
@@ -148,7 +208,7 @@ export function createRender(options) {
     
     function mountChildren(children, container, parentComponent) {
         children.forEach((v) => {
-            patch(null, v, container, parentComponent);
+            patch(null, v, container, null, parentComponent);
         })
     }
     
@@ -181,7 +241,7 @@ export function createRender(options) {
                 instance.subTree = subTree;
 
                 if(subTree) {
-                    patch(null, subTree, container, instance);
+                    patch(null, subTree, container, null, instance);
                 }
                 vNode.el = subTree.el;
                 instance.isMounted = true;
@@ -197,7 +257,7 @@ export function createRender(options) {
                 instance.subTree = subTree;
                 
                 if(subTree) {
-                    patch(previewTree, subTree, container, instance);
+                    patch(previewTree, subTree, container, null, instance);
                 }
                 vNode.el = subTree.el;
             }
