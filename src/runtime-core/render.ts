@@ -196,7 +196,7 @@ export function createRender(options) {
                 let oldNode = c1[index];
 
                 if(count >= toBePatchCount) {
-                    hostRemove(oldNode);
+                    hostRemove(oldNode.el);
                     continue;
                 }
                 let newIndex;
@@ -212,7 +212,7 @@ export function createRender(options) {
                 }
 
                 if(newIndex === undefined) {
-                    hostRemove(oldNode);
+                    hostRemove(oldNode.el);
                 } else {
                     patch(oldNode, c2[newIndex], container, null, parentComponent);
                     count++;
