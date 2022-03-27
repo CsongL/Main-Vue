@@ -181,6 +181,43 @@ export function createRender(options) {
                 hostRemove(c1[i].el);
                 i++;
             }
+        }else{
+            let oldStart = i;
+            let newStart = i;
+            let toBePatchCount = e2 - i + 1;
+            let count = 0;
+            let keyToIndexMap = new Map();
+
+            for(let index = newStart; index <= e2; index++) {
+                keyToIndexMap.set(c2[index].key, index);
+            }
+
+            for(let index = oldStart; index <= e1; index++) {
+                let oldNode = c1[index];
+
+                if(count >= toBePatchCount) {
+                    hostRemove(oldNode);
+                    continue;
+                }
+                let newIndex;
+                if(oldNode.key !== null) {
+                    newIndex = keyToIndexMap.get(oldNode.key);
+                } else{
+                    for(let i = newStart; i <= e2; i++) {
+                        if(isSameVNode(oldNode, c2[i])) {
+                            newIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                if(newIndex === undefined) {
+                    hostRemove(oldNode);
+                } else {
+                    patch(oldNode, c2[newIndex], container, null, parentComponent);
+                    count++;
+                }
+            }
         }
 
     }
