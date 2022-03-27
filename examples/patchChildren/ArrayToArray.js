@@ -56,20 +56,41 @@ import { h, ref } from '../../lib/guide-mini-vue.esm.js';
 
 // 中间节点
 // 位置不对
+// const prevArray = [ 
+//     h('div', {key: 'A'}, 'A'),
+//     h('div', {key: 'B'}, 'B'),
+//     h('div', {key: 'F'}, 'F'),
+//     h('div', {key: 'C'}, 'C'),
+//     h('div', {key: 'E'}, 'E'),
+// ]
+
+// const currArray = [ 
+//     h('div', {key: 'A'}, 'A'),
+//     h('div', {key: 'B'}, 'B'),
+//     h('div', {key: 'C', id: 'C-next'}, 'C'),
+//     h('div', {key: 'D', id: 'D-next'}, 'D'),
+//     h('div', {key: 'E'}, 'E'),
+// ]
+
+// 
 const prevArray = [ 
     h('div', {key: 'A'}, 'A'),
     h('div', {key: 'B'}, 'B'),
-    h('div', {key: 'F'}, 'F'),
     h('div', {key: 'C'}, 'C'),
+    h('div', {key: 'D'}, 'D'),
     h('div', {key: 'E'}, 'E'),
+    h('div', {key: 'F'}, 'F'),
+    h('div', {key: 'G'}, 'G')
 ]
 
 const currArray = [ 
     h('div', {key: 'A'}, 'A'),
     h('div', {key: 'B'}, 'B'),
+    h('div', {key: 'Z'}, 'Z'),
     h('div', {key: 'C', id: 'C-next'}, 'C'),
     h('div', {key: 'D', id: 'D-next'}, 'D'),
     h('div', {key: 'E'}, 'E'),
+    h('div', {key: 'G'}, 'G')
 ]
 
 export default {

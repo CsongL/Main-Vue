@@ -31,8 +31,8 @@ export function setElementText(el, text) {
     el.textContent = text;
 }
 
-export function insert(el, container, anchor = null) {
-    container.insertBefore(el, anchor);
+export function insert(el, containerElement, anchor = null) {
+    containerElement.insertBefore(el, anchor);
 }
 
 let renderer: any = createRender({
