@@ -14,6 +14,7 @@ export function createComponentInstance(vNode, parent) {
         slots: {}, // 存放插槽
         provides: parent ? parent.provides : {},
         parent,
+        next: null,
         emit: () => {}, // 声明组件实例对象的emit属性
     }
     instance.emit = emit.bind(null, instance) as any;

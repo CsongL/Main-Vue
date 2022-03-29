@@ -5,6 +5,7 @@ import { Fragment, Text } from './vNode'
 import { createAppApi } from './createApp'
 import { effect } from '../reactivity/src/effect'
 import { remove } from '../runtime-dom'
+import { shouldUpdateComponent } from './componentRenderUtils'
 
 export function createRender(options) {
     const { 
@@ -297,13 +298,13 @@ export function createRender(options) {
         if(!n1) {
             mountComponent(n2, container, parentComponent);
         } else {
-            updateComponent(n1, n2, container, parentComponent);
+            updateComponent(n1, n2);
         }
     }
     
     function mountComponent(vNode, container, parentComponent) {
         // 第一步创建一个组件实例对象
-        const instance = createComponentInstance(vNode, parentComponent);
+        const instance = (vNode.component = createComponentInstance(vNode, parentComponent));
     
         // 第二部设置组件实例对象的属性
         setupComponent(instance);
@@ -311,7 +312,7 @@ export function createRender(options) {
     }
     
     function setupRenderEffect(instance, vNode, container) {
-        effect(() => {
+        instance.update = effect(() => {
             if(!instance.isMounted) {
                 let { proxy } = instance;
                 if(!instance.render) return;
@@ -327,6 +328,19 @@ export function createRender(options) {
             } else {
                 let { proxy } = instance;
                 if(!instance.render) return;
+
+                // 更新组件其实这里就是处理更新组件上的属性
+                // 组件内部的元素 其实 就是更新元素的路数
+                // 刚开始进来时 都是以组件的形式，然后在慢慢拆分为元素，
+                // 总的来说 就是 组件上更新的是组件的属性，落到最后其实本质上还是更新元素
+                // 所以这里就只用更新 组件属性， 而更新元素 在之前实现的元素更新里面已经实现了
+                const { next, vNode } = instance;
+
+                if(next) {
+                    next.el = vNode.el;
+                    updateComponentPreRender(instance, next);
+                }
+
 
                 const subTree = instance.render.call(proxy);
                 const previewTree = instance.subTree;
@@ -344,7 +358,34 @@ export function createRender(options) {
         
     }
     // 更新组件
-    function updateComponent(n1, n2, container, parentComponent) {
+    function updateComponent(n1, n2) {
+        // 获取旧虚拟节点对应的组件实例对象
+        const instance = (n2.component = n1.component);
+        if(shouldUpdateComponent(n1, n2)) {
+            // 组件上的属性发生了更新，那么组件实例对象上的props属性需要发生更新
+            // 旧节点对应的组件实例对象的下一个更新的虚拟节点
+            instance.next = n2;
+
+            // 调用 setUpRenderEffect函数内effect()函数返回的runner 从而重新调用是实例对象上的render()函数，从而重新触发组件内元素的更新
+            instance.update();
+        } else {
+            // 组件属性没有更新，那么只需要更新组件内的元素就行
+            n2.el = n1.el;
+            instance.vNode = n2;
+        }
+        
+
+    }
+
+    function updateComponentPreRender(instance, nextVNode) {
+        // 更新组件实例对象对应的vNode
+        instance.vNode = nextVNode;
+        
+        // 更新组件实例对象上的属性为对应的最新虚拟节点上的属性
+        instance.props = nextVNode.props;
+
+        // 更新完成之后 将instance.next 设置为null 因为已经当前组件实例对象已经更新完毕
+        instance.next = null;
 
     }
 

@@ -3,7 +3,8 @@ import { hasOwn } from "../shared/index";
 
 const publicPropertiesMap = {
     $el: (i) => i.vNode.el,
-    $slot: (i) => i.slots
+    $slot: (i) => i.slots,
+    $props: (i) => i.props,
 };
 
 export const componentPublicInstance = {
