@@ -6,6 +6,7 @@ import { createAppApi } from './createApp'
 import { effect } from '../reactivity/src/effect'
 import { remove } from '../runtime-dom'
 import { shouldUpdateComponent } from './componentRenderUtils'
+import { queryJob } from './schedule'
 
 export function createRender(options) {
     const { 
@@ -353,6 +354,13 @@ export function createRender(options) {
                     patch(previewTree, subTree, container, null, instance);
                 }
                 vNode.el = subTree.el;
+            }
+        }, {
+            schedule() {
+                // 视图异步更新，避免多次值被多次改变时，视图也要被多次更新
+                // 减少性能开销
+                console.log('schedule-update');
+                queryJob(instance.update);
             }
         })
         
