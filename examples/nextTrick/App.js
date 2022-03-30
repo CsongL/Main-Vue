@@ -1,14 +1,18 @@
-import { h, ref } from '../../lib/guide-mini-vue.esm.js'
+import { h, ref, nextTick, getCurrentInstance } from '../../lib/guide-mini-vue.esm.js'
 
 export default {
     name: 'app',
     setup() {
         const count = ref(0);
+        const instance = getCurrentInstance();
         const onClick = function() {
             for(let i = 0; i < 100; i++) {
                 count.value = i;
             }
         };
+        nextTick(() => {
+            console.log(instance);
+        })
         return {
             count,
             onClick
