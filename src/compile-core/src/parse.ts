@@ -38,12 +38,10 @@ function parseElement(context) {
 
 function parseTag(context, tagType: TagType) {
     let match: any = /^<(\/?[a-z]+)/i.exec(context.source);
-    console.log(match);
     let tag = match[1];
 
     advanceBy(context, match[0].length);
     advanceBy(context, 1);
-    console.log(context.source);
 
     if(tagType === TagType.END) return
 
