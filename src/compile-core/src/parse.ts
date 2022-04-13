@@ -1,3 +1,4 @@
+import { isReadonly } from "../../reactivity/src/reactivity";
 import { NodeTypes } from "./ast";
 
 const enum TagType {
@@ -7,31 +8,61 @@ const enum TagType {
 
 export function baseParse(content) {
     let context = createParserContext(content);
-    return createRoot(parseChildren(context))
+    return createRoot(parseChildren(context, []));
 }
 
 
-function parseChildren(context) {
+function parseChildren(context, ancestors) {
     let nodes: any = []
 
-    let node;
-    let s = context.source;
-    if(s.startsWith("{{")) {
-        node = parseInterpolation(context);
-    } else if(s[0] === '<') {
-        node = parseElement(context);
-    }
+    while(!isEnd(context, ancestors)){
+        let node;
+        let s = context.source;
+        if(s.startsWith("{{")) {
+            node = parseInterpolation(context);
+        } else if(s[0] === '<') {
+            node = parseElement(context, ancestors);
+        }
 
-    nodes.push(node);
+        if(!node) {
+            node = parseText(context);
+        }
+        nodes.push(node);
+    }
     
     
     return nodes;
 }
 
-function parseElement(context) {
-    let elementNode = parseTag(context, TagType.START);
+function parseText(context) {
+    let endTokens = ['<', '{{'];
+    let endIndex = context.source.length;
+    for(let i = 0; i < endTokens.length; i++) {
+        let index = context.source.indexOf(endTokens[i]);
+        if(index !== -1 && endIndex > index) {
+            endIndex = index;
+        }
+    }
+    const content = parseTextData(context, endIndex);
+    return {
+        type: NodeTypes.TEXT,
+        content
+    }
+}
 
-    parseTag(context, TagType.END);
+function parseElement(context, ancestors) {
+    let elementNode: any = parseTag(context, TagType.START);
+    ancestors.push(elementNode);
+    elementNode.children = parseChildren(context, ancestors);
+    ancestors.pop();
+
+    console.log(elementNode);
+    if(startWithEndTag(context.source, elementNode.tag)) {
+        parseTag(context, TagType.END);
+    } else {
+        throw new Error(`缺少结束标签:${elementNode.tag}`);
+    }
+
 
     return elementNode;
 }
@@ -64,9 +95,9 @@ function parseInterpolation(context) {
 
     const rawContentLength = closeIndex - beginDelimiter.length;
 
-    const content = context.source.slice(0, rawContentLength).trim();
+    const content = parseTextData(context, rawContentLength).trim();
 
-    advanceBy(context, rawContentLength + closeDelimiter.length);
+    advanceBy(context, closeDelimiter.length);
 
     return {
         type: NodeTypes.INTERPOLATION,
@@ -75,6 +106,31 @@ function parseInterpolation(context) {
             content: content,
         }
     }
+}
+
+function isEnd(context, ancestors) {
+    let s = context.source;
+    if(s.startsWith('</')) {
+        for(let i = ancestors.length - 1; i >= 0; i--) {
+            if(startWithEndTag(s, ancestors[i].tag)) {
+                return true;
+            }
+        }
+    }
+    // if(parentTag && s.startsWith(`</${parentTag}>`) ) {
+    //     return true;
+    // }
+    return !s
+}
+
+function startWithEndTag(source, tag) {
+    return source.startsWith('</') && source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase();
+}
+function parseTextData(context, length) {
+    const content = context.source.slice(0, length);
+
+    advanceBy(context, length);
+    return content;
 }
 
 function advanceBy(context, length: number) {
