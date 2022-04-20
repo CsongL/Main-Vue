@@ -12,7 +12,12 @@ export function transform(root, options = {}) {
 }
 
 function createRootCodegen(root){
-    root.codegenNode = root.children[0];
+    const child = root.children[0];
+    if(child.type === NodeTypes.ELEMENT) {
+        root.codegenNode = child.codegenNode;
+    } else {
+        root.codegenNode = root.children[0];
+    }
 }
 
 function createTransformContext(root, options) {
@@ -30,9 +35,11 @@ function createTransformContext(root, options) {
 
 function traverseNode(node, context) {
     const nodeTransforms = context.nodeTransforms;
+    const exitFns: any = [];
     for(let i = 0; i < nodeTransforms.length; i++) {
         const transform = nodeTransforms[i];
-        transform(node);
+        const onExit = transform(node, context);
+        if(onExit) exitFns.push(onExit)
     }
 
     switch (node.type) {
@@ -43,10 +50,13 @@ function traverseNode(node, context) {
         case NodeTypes.ELEMENT:
             traverseChildren(node, context);
             break;
+        default:
+            break;
     }
-
-
-    traverseChildren(node, context)
+    let i = exitFns.length;
+    while(i--) {
+        exitFns[i]();
+    }
 }
 
 function traverseChildren(node, context) {
