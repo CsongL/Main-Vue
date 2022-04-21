@@ -318,7 +318,7 @@ export function createRender(options) {
                 let { proxy } = instance;
                 if(!instance.render) return;
 
-                const subTree = instance.render.call(proxy);
+                const subTree = instance.render.call(proxy, proxy);
                 instance.subTree = subTree;
 
                 if(subTree) {
@@ -343,7 +343,7 @@ export function createRender(options) {
                 }
 
 
-                const subTree = instance.render.call(proxy);
+                const subTree = instance.render.call(proxy, proxy);
                 const previewTree = instance.subTree;
                 console.log('previewTree', previewTree);
                 console.log('currentTree', subTree);
