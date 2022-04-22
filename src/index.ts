@@ -1,5 +1,4 @@
 export * from "./runtime-dom"
-export * from "./reactivity"
 
 import { baseCompile } from "./compile-core/src";
 import * as runtimeDom from './runtime-dom';
